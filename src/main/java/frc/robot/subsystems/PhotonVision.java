@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import java.io.Console;
+
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.PhotonUtils;
@@ -14,11 +16,21 @@ import io.github.oblarg.oblog.annotations.Log;
 
 public class PhotonVision extends SubsystemBase implements Loggable {
   
-  PhotonCamera camera = new PhotonCamera("Arducam_OV9281_USB_Camera");
+  PhotonCamera camera; 
+  @Log Double result;
   /** Creates a new PhotonVision. */
   public PhotonVision() {
-    camera.getLatestResult();
+    camera = new PhotonCamera("pvcam");
   }
+
+  public void getYaw(){
+    if (camera.getLatestResult().hasTargets()==true);{
+      result = camera.getLatestResult().getBestTarget().getYaw();
+      System.out.println(result);
+    }
+  }
+  
+  
 
   @Override
   public void periodic() {
