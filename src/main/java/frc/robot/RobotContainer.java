@@ -52,7 +52,6 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    m_Controller.b().whileTrue(new InstantCommand(()->photonvision.getYaw()));
 
     //photonvision.setDefaultCommand(new RunCommand(()-> photonvision.getYaw()));
     
