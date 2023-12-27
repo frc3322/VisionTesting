@@ -4,15 +4,14 @@
 
 package frc.robot.subsystems;
 
-import java.io.Console;
 import java.io.IOException;
 import java.util.Optional;
 
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.targeting.PhotonPipelineResult;
-import org.photonvision.PhotonUtils;
+
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.targeting.PhotonPipelineResult;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -20,6 +19,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
@@ -34,9 +34,11 @@ public class PhotonVision extends SubsystemBase implements Loggable {
   PhotonPoseEstimator photonPoseEstimator;
   @Log Pose3d poseEstimate;
 
+  PhotonPipelineResult currentResult;
+
   /** Creates a new PhotonVision. */
   public PhotonVision() {
-    camera = new PhotonCamera("pvcam");
+    camera = new PhotonCamera("camera");
 
     Transform3d robotToCam = new Transform3d(new Translation3d(0, 0, 0), new Rotation3d(0,0,0));
     photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.LOWEST_AMBIGUITY, camera, robotToCam);
@@ -48,10 +50,16 @@ public class PhotonVision extends SubsystemBase implements Loggable {
     }
   }
 
-  public void updateYaw() {
+  public PhotonPipelineResult getResult(){
     if (camera.getLatestResult().hasTargets()) {
-      yaw = camera.getLatestResult().getBestTarget().getYaw();
+      return camera.getLatestResult();
     }
+    return null;
+  }
+
+  public double getYaw() {
+    double yaw = currentResult == null ? 0 : currentResult.getBestTarget().getYaw();
+    return yaw;
   }
 
   public void updatePose() {
@@ -63,7 +71,14 @@ public class PhotonVision extends SubsystemBase implements Loggable {
   
   @Override
   public void periodic() {
-    updateYaw();
-    updatePose();
+    
+    //Assigns the result of this loop to a variable
+    if (camera.getLatestResult().hasTargets()) {
+      currentResult = camera.getLatestResult();
+    }
+    
+    yaw = getYaw();
+    
+    //updatePose();
   }
 }
